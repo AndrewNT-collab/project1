@@ -1,169 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Pert3Page extends StatefulWidget {
-  const Pert3Page({super.key});
+class Belanja {
+  final String nama;
+  final int jumlah;
+  final String kategori;
+  bool dibeli;
 
-  @override
-  State<Pert3Page> createState() => _Pert3PageState();
-}
-
-class _Pert3PageState extends State<Pert3Page> {
-  final _formKey = GlobalKey<FormState>();
-
-  String _nama = '';
-  String _email = '';
-  String _jurusan = 'Teknik Informatika';
-  bool _setuju = false;
-
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Data berhasil disimpan untuk $_nama',
-          ),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Form Pendaftaran'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Nama',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Nama wajib diisi';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  _nama = value!;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Email wajib diisi';
-                  }
-
-                  if (!value.contains('@')) {
-                    return 'Email harus mengandung @';
-                  }
-
-                  return null;
-                },
-                onSaved: (value) {
-                  _email = value!;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              DropdownButtonFormField<String>(
-                value: _jurusan,
-                decoration: const InputDecoration(
-                  labelText: 'Jurusan',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Teknik Informatika',
-                    child: Text('Teknik Informatika'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Sistem Informasi',
-                    child: Text('Sistem Informasi'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Teknik Elektro',
-                    child: Text('Teknik Elektro'),
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _jurusan = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              CheckboxListTile(
-                title: const Text(
-                  'Saya menyetujui data yang diberikan',
-                ),
-                value: _setuju,
-                onChanged: (value) {
-                  setState(() {
-                    _setuju = value!;
-                  });
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              ElevatedButton(
-                onPressed: _setuju ? _submit : null,
-                child: const Text('Daftar'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Tugas {
-  final String judul;
-  bool selesai;
-
-  Tugas(
-      this.judul, {
-        this.selesai = false,
+  Belanja(
+      this.nama,
+      this.jumlah,
+      this.kategori, {
+        this.dibeli = false,
       });
 }
 
-class TugasModel extends ChangeNotifier {
-  final List<Tugas> _items = [];
+class BelanjaModel extends ChangeNotifier {
+  final List<Belanja> _items = [];
 
-  List<Tugas> get items => List.unmodifiable(_items);
+  List<Belanja> get items => List.unmodifiable(_items);
 
-  int get jumlahSelesai {
-    return _items.where((item) => item.selesai).length;
-  }
+  int get jumlahBelumDibeli =>
+      _items.where((item) => !item.dibeli).length;
 
-  void tambah(String judul) {
-    _items.add(Tugas(judul));
+  void tambah(String nama, int jumlah, String kategori) {
+    _items.add(
+      Belanja(
+        nama,
+        jumlah,
+        kategori,
+      ),
+    );
     notifyListeners();
   }
 
   void toggle(int index) {
-    _items[index].selesai = !_items[index].selesai;
+    _items[index].dibeli = !_items[index].dibeli;
     notifyListeners();
   }
 
@@ -172,47 +44,55 @@ class TugasModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-class TugasPage extends StatelessWidget {
-  const TugasPage({super.key});
+
+class TugasMandiriPage extends StatelessWidget {
+  const TugasMandiriPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final model = context.watch<TugasModel>();
+    final model = context.watch<BelanjaModel>();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Tugas (${model.jumlahSelesai} selesai)',
+          'Daftar Belanja (${model.jumlahBelumDibeli} belum dibeli)',
         ),
       ),
       body: model.items.isEmpty
           ? const Center(
-        child: Text('Belum ada tugas'),
+        child: Text('Belum ada barang'),
       )
           : ListView.builder(
         itemCount: model.items.length,
         itemBuilder: (context, index) {
-          final tugas = model.items[index];
+          final item = model.items[index];
 
           return ListTile(
             leading: Checkbox(
-              value: tugas.selesai,
+              value: item.dibeli,
               onChanged: (_) {
-                context.read<TugasModel>().toggle(index);
+                context
+                    .read<BelanjaModel>()
+                    .toggle(index);
               },
             ),
             title: Text(
-              tugas.judul,
+              item.nama,
               style: TextStyle(
-                decoration: tugas.selesai
+                decoration: item.dibeli
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
               ),
             ),
+            subtitle: Text(
+              'Jumlah: ${item.jumlah} | Kategori: ${item.kategori}',
+            ),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                context.read<TugasModel>().hapus(index);
+                context
+                    .read<BelanjaModel>()
+                    .hapus(index);
               },
             ),
           );
@@ -223,7 +103,7 @@ class TugasPage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const TambahPage(),
+              builder: (_) => const TambahBelanjaPage(),
             ),
           );
         },
@@ -232,32 +112,50 @@ class TugasPage extends StatelessWidget {
     );
   }
 }
-class TambahPage extends StatefulWidget {
-  const TambahPage({super.key});
+
+class TambahBelanjaPage extends StatefulWidget {
+  const TambahBelanjaPage({super.key});
 
   @override
-  State<TambahPage> createState() => _TambahPageState();
+  State<TambahBelanjaPage> createState() =>
+      _TambahBelanjaPageState();
 }
 
-class _TambahPageState extends State<TambahPage> {
-  final TextEditingController _controller =
+class _TambahBelanjaPageState
+    extends State<TambahBelanjaPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _namaController =
   TextEditingController();
 
-  void _simpan() {
-    final judul = _controller.text.trim();
+  final TextEditingController _jumlahController =
+  TextEditingController();
 
-    if (judul.isEmpty) {
+  String _kategori = 'Makanan';
+
+  void _simpan() {
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    context.read<TugasModel>().tambah(judul);
+    final nama = _namaController.text.trim();
+    final jumlah = int.parse(
+      _jumlahController.text.trim(),
+    );
+
+    context.read<BelanjaModel>().tambah(
+      nama,
+      jumlah,
+      _kategori,
+    );
 
     Navigator.pop(context);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _namaController.dispose();
+    _jumlahController.dispose();
     super.dispose();
   }
 
@@ -265,28 +163,88 @@ class _TambahPageState extends State<TambahPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Tugas'),
+        title: const Text('Tambah Belanja'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                labelText: 'Judul tugas',
-                border: OutlineInputBorder(),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _namaController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama barang',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null ||
+                      value.trim().isEmpty) {
+                    return 'Nama barang wajib diisi';
+                  }
+                  return null;
+                },
               ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _simpan,
-                child: const Text('Simpan'),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _jumlahController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Jumlah',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  final jumlah =
+                  int.tryParse(value ?? '');
+
+                  if (jumlah == null) {
+                    return 'Jumlah wajib diisi';
+                  }
+
+                  if (jumlah <= 0) {
+                    return 'Jumlah harus lebih dari 0';
+                  }
+
+                  return null;
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _kategori,
+                decoration: const InputDecoration(
+                  labelText: 'Kategori',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Makanan',
+                    child: Text('Makanan'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Minuman',
+                    child: Text('Minuman'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Lainnya',
+                    child: Text('Lainnya'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    _kategori = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _simpan,
+                  child: const Text('Simpan'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => BelanjaModel(),
       child: MaterialApp(
-        title: 'Tugas Mandiri',
+        title: 'Daftar Belanja',
         home: const TugasMandiriPage(),
       ),
     );

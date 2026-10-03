@@ -32,7 +32,6 @@ class _Pert1PageState extends State<Pert1Page> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // PROFIL
             const Icon(
               Icons.flutter_dash,
               size: 100,
@@ -60,7 +59,6 @@ class _Pert1PageState extends State<Pert1Page> {
 
             const SizedBox(height: 40),
 
-            // COUNTER
             const Text(
               'Counter',
               style: TextStyle(fontSize: 20),

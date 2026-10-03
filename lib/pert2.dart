@@ -11,7 +11,6 @@ class Kontak {
       this.email,
       );
 }
-
 const daftarKontak = [
   Kontak(
     'Andi',
@@ -44,7 +43,6 @@ const daftarKontak = [
     'fajar@gmail.com',
   ),
 ];
-
 class Pert2Page extends StatelessWidget {
   const Pert2Page({super.key});
 
